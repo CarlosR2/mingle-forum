@@ -25,7 +25,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
+//test
 //Textdomain Hook
 $plugin_dir = basename(dirname(__FILE__));
 load_plugin_textdomain('mingleforum', false, $plugin_dir . '/i18n/');
