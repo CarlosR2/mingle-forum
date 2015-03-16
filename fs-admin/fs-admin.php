@@ -253,6 +253,7 @@ class mingleforumadmin
 
   function skins()
   {
+	  
     $class = "";
     // Find all skins within directory
     // Open a known directory, and proceed to read its contents
@@ -260,8 +261,10 @@ class mingleforumadmin
       echo '<div id="message" class="updated fade"><p>' . __('Skin successfully activated.', 'mingleforum') . '</p></div>';
 
     $op = get_option('mingleforum_options');
+	  
     if (is_dir(SKINDIR))
-    {
+    {	
+		
       if ($dh = opendir(SKINDIR))
       {
         $image = WPFURL . "images/logomain.png";

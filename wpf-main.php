@@ -27,6 +27,15 @@
  */
 //test
 //Textdomain Hook
+
+define('DEBUG',true);
+
+if(DEBUG){	
+	ini_set('display_errors',1);
+	ini_set('display_startup_errors',1);
+	error_reporting(-1);	
+}
+
 $plugin_dir = basename(dirname(__FILE__));
 load_plugin_textdomain('mingleforum', false, $plugin_dir . '/i18n/');
 
