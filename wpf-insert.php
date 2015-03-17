@@ -6,16 +6,22 @@
 $the_forum_id = false;
 if (isset($_POST['add_topic_forumid']) && !empty($_POST['add_topic_forumid']))
   $the_forum_id = $this->check_parms($_POST['add_topic_forumid']);
+
+
 if (isset($_POST['add_post_forumid']) && !empty($_POST['add_post_forumid']))
 {
   $the_thread_id = $this->check_parms($_POST['add_post_forumid']);
   $the_forum_id = $wpdb->get_var($wpdb->prepare("SELECT `parent_id` FROM {$this->t_threads} WHERE `id` = %d", $the_thread_id));
 }
+
+
 if (isset($_POST['thread_id']) && !empty($_POST['thread_id']) && isset($_POST['edit_post_submit']))
 {
   $the_thread_id = $this->check_parms($_POST['thread_id']);
   $the_forum_id = $wpdb->get_var($wpdb->prepare("SELECT `parent_id` FROM {$this->t_threads} WHERE `id` = %d", $the_thread_id));
 }
+
+
 if (is_numeric($the_forum_id))
 {
   $the_cat_id = $wpdb->get_var("SELECT `parent_id` FROM {$this->t_forums} WHERE `id` = {$the_forum_id}");
@@ -25,6 +31,8 @@ if (is_numeric($the_forum_id))
 }
 //End Check
 //Spam time interval check
+
+
 if (!is_super_admin() && !$this->is_moderator($user_ID, $the_forum_id))
 {
   //We're going to not set a user ID here, I know unconventional, but it's an easy way to account for guests.
@@ -38,6 +46,8 @@ if (!is_super_admin() && !$this->is_moderator($user_ID, $the_forum_id))
   else
     $wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->usermeta} (`meta_key`, `meta_value`) VALUES (%s, %d)", $spam_meta_key, time()));
 }
+
+
 
 function ip_to_string()
 {

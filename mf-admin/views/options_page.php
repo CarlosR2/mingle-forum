@@ -1,6 +1,13 @@
 <div class="wrap">
   <h2>Mingle Forum - <?php _e('Options', 'mingle-forum'); ?></h2>
 
+
+add options
+
+	-> jump to forum when only 1 forum
+	-> show all forum (even when hidden)
+
+
   <?php if($saved): ?>
     <div id="message" class="updated below-h2">
       <p><?php _e('Your options have been saved.', 'mingle-forum'); ?></p>
@@ -36,6 +43,15 @@
           <!-- NEED to change this into a multi-select sometime soon -->
           <input type="text" name="forum_disabled_cats" id="forum_disabled_cats" value="<?php echo implode(',', $mingleforum->options['forum_disabled_cats']); ?>" class="mf_tb" />
         </p>
+        
+        
+		  <p>
+			  <input type="checkbox" name="show_hidden_forums" id="show_hidden_forums" <?php checked(!empty($mingleforum->options['show_hidden_forums'])); ?> />
+			  <label for="allow_user_replies_locked_cats" class="mf_cb_label">
+				  <?php _e('Show hidden forums', 'mingle-forum'); ?>
+			  </label>
+		  </p>
+        
       </div>
 
       <h3><?php _e('Login & Logout', 'mingle-forum'); ?></h3>
