@@ -1,4 +1,18 @@
 <?php
+
+
+
+// not used anymore;
+
+die('not used');
+
+
+
+
+
+
+
+
 //THIS STILL NEEDS LOTS OF CLEANUP
 //BUT AT LEAST IT NO LONGER LOADS ON A SEPARATE INSTANCE
 
@@ -33,6 +47,15 @@ if (is_numeric($the_forum_id))
 //Spam time interval check
 
 
+
+
+
+
+
+
+
+
+
 if (!is_super_admin() && !$this->is_moderator($user_ID, $the_forum_id))
 {
   //We're going to not set a user ID here, I know unconventional, but it's an easy way to account for guests.
@@ -49,90 +72,12 @@ if (!is_super_admin() && !$this->is_moderator($user_ID, $the_forum_id))
 
 
 
-function ip_to_string()
-{
-  return preg_replace("/[^0-9]/", "_", $_SERVER["REMOTE_ADDR"]);
-}
 
-//End Spam time interval check
 
-function mf_u_key()
-{
-  $pref = "";
-  for ($i = 0; $i < 5; $i++)
-  {
-    $d = rand(0, 1);
-    $pref .= $d ? chr(rand(97, 122)) : chr(rand(48, 57));
-  }
-  return $pref . "-";
-}
 
-function MFAttachImage($temp, $name)
-{
-  //GET USERS UPLOAD PATH
-  $upload_dir = wp_upload_dir();
-  $path = $upload_dir['path'] . "/";
-  $url = $upload_dir['url'] . "/";
-  $u = mf_u_key();
-  $name = sanitize_file_name($name);
-  if (!empty($name))
-    move_uploaded_file($temp, $path . $u . $name);
-  return "\n[img]" . $url . $u . $name . "[/img]";
-}
 
-function MFGetExt($str)
-{
-  //GETS THE FILE EXTENSION BELONGING TO THE UPLOADED FILE
-  $i = strrpos($str, ".");
-  if (!$i)
-  {
-    return "";
-  }
-  $l = strlen($str) - $i;
-  $ext = substr($str, $i + 1, $l);
-  return $ext;
-}
 
-function mf_check_uploaded_images()
-{
-  $valid = array('im1' => true, 'im2' => true, 'im3' => true);
-  if (!empty($_FILES))
-  {
-    if ($_FILES["mfimage1"]["error"] > 0 && !empty($_FILES["mfimage1"]["name"]))
-      $valid['im1'] = false;
-    if ($_FILES["mfimage2"]["error"] > 0 && !empty($_FILES["mfimage2"]["name"]))
-      $valid['im2'] = false;
-    if ($_FILES["mfimage3"]["error"] > 0 && !empty($_FILES["mfimage3"]["name"]))
-      $valid['im3'] = false;
-  }
-  if (!empty($_FILES["mfimage1"]["name"]))
-  {
-    $ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage1"]["name"])));
-    if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
-      $valid['im1'] = false;
-  }
-  else
-    $valid['im1'] = false;
-  if (!empty($_FILES["mfimage2"]["name"]))
-  {
-    $ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage2"]["name"])));
-    if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
-      $valid['im2'] = false;
-  }
-  else
-    $valid['im2'] = false;
-  if (!empty($_FILES["mfimage3"]["name"]))
-  {
-    $ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage3"]["name"])));
-    if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
-      $valid['im2'] = false;
-  }
-  else
-    $valid['im3'] = false;
-  return $valid;
-}
-
-//--weaver-- check if guest filled in form
+//--weaver-- check if guest filled in form. TODO. (guests cant edit)
 if (!isset($_POST['edit_post_submit']))
 {
   $errormsg = apply_filters('wpwf_check_guestinfo', "");
@@ -143,6 +88,10 @@ if (!isset($_POST['edit_post_submit']))
   }
 }
 //--weaver-- end guest form check
+
+
+
+
 
 if (isset($this->options['forum_captcha']) && $this->options['forum_captcha'] == true && !$user_ID)
 {
@@ -160,7 +109,16 @@ if (isset($this->options['forum_captcha']) && $this->options['forum_captcha'] ==
   }
 }
 
+
+
+
 $cur_user_ID = apply_filters('wpwf_change_userid', $user_ID); // --weaver-- use real id or generated guest ID
+
+
+
+
+
+
 //ADDING A NEW TOPIC?
 if (isset($_POST['add_topic_submit']))
 {
@@ -241,6 +199,17 @@ if (isset($_POST['add_topic_submit']))
     wp_die($msg);
 }
 
+
+
+
+
+
+
+
+
+
+
+
 //ADDING A POST REPLY?
 if (isset($_POST['add_post_submit']))
 {
@@ -311,6 +280,15 @@ if (isset($_POST['add_post_submit']))
     wp_die($msg);
 }
 
+
+
+
+
+
+
+
+
+
 //EDITING A POST?
 if (isset($_POST['edit_post_submit']))
 {
@@ -357,4 +335,121 @@ if (isset($_POST['edit_post_submit']))
   wp_redirect(html_entity_decode($this->get_paged_threadlink($thread) . "#postid-" . $edit_post_id));
   exit;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////// FUNCTIONS
+
+
+
+
+function ip_to_string()
+{
+	return preg_replace("/[^0-9]/", "_", $_SERVER["REMOTE_ADDR"]);
+}
+
+//End Spam time interval check
+
+function mf_u_key()
+{
+	$pref = "";
+	for ($i = 0; $i < 5; $i++)
+	{
+		$d = rand(0, 1);
+		$pref .= $d ? chr(rand(97, 122)) : chr(rand(48, 57));
+	}
+	return $pref . "-";
+}
+
+function MFAttachImage($temp, $name)
+{
+	//GET USERS UPLOAD PATH
+	$upload_dir = wp_upload_dir();
+	$path = $upload_dir['path'] . "/";
+	$url = $upload_dir['url'] . "/";
+	$u = mf_u_key();
+	$name = sanitize_file_name($name);
+	if (!empty($name))
+		move_uploaded_file($temp, $path . $u . $name);
+	return "\n[img]" . $url . $u . $name . "[/img]";
+}
+
+function MFGetExt($str)
+{
+	//GETS THE FILE EXTENSION BELONGING TO THE UPLOADED FILE
+	$i = strrpos($str, ".");
+	if (!$i)
+	{
+		return "";
+	}
+	$l = strlen($str) - $i;
+	$ext = substr($str, $i + 1, $l);
+	return $ext;
+}
+
+function mf_check_uploaded_images()
+{
+	$valid = array('im1' => true, 'im2' => true, 'im3' => true);
+	if (!empty($_FILES))
+	{
+		if ($_FILES["mfimage1"]["error"] > 0 && !empty($_FILES["mfimage1"]["name"]))
+			$valid['im1'] = false;
+		if ($_FILES["mfimage2"]["error"] > 0 && !empty($_FILES["mfimage2"]["name"]))
+			$valid['im2'] = false;
+		if ($_FILES["mfimage3"]["error"] > 0 && !empty($_FILES["mfimage3"]["name"]))
+			$valid['im3'] = false;
+	}
+	if (!empty($_FILES["mfimage1"]["name"]))
+	{
+		$ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage1"]["name"])));
+		if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
+			$valid['im1'] = false;
+	}
+	else
+		$valid['im1'] = false;
+	if (!empty($_FILES["mfimage2"]["name"]))
+	{
+		$ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage2"]["name"])));
+		if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
+			$valid['im2'] = false;
+	}
+	else
+		$valid['im2'] = false;
+	if (!empty($_FILES["mfimage3"]["name"]))
+	{
+		$ext = strtolower(MFGetExt(stripslashes($_FILES["mfimage3"]["name"])));
+		if ($ext != "jpg" && $ext != "jpeg" && $ext != "bmp" && $ext != "png" && $ext != "gif")
+			$valid['im2'] = false;
+	}
+	else
+		$valid['im3'] = false;
+	return $valid;
+}
+
+
+
 ?>
