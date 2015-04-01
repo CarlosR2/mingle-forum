@@ -656,7 +656,8 @@ ul#wpf-menu li,.wpf-postmeta li {
 .wpf-table td.forumtitle {
   text-align: left;
   overflow: hidden;
-  background: url('images/catbg.jpg') !important;
+  /*background: url('images/catbg.jpg') !important;*/
+	background: #333; 
   padding: 5px;
   color: #fff;
   border-width: 0;
