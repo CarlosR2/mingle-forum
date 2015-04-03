@@ -445,6 +445,7 @@ table.wpf-profile-fields tr td, table tr th {
 .wpf-textarea,
 #sig-box,
 #wpf-wrapper textarea{
+<<<<<<< HEAD
   box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
   -webkit-box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
   -moz-box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
@@ -457,6 +458,21 @@ table.wpf-profile-fields tr td, table tr th {
   background-color:none !important;
   border: 1px solid #E3E3E3!important;
   padding:4px;
+=======
+	box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
+	-webkit-box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
+	-moz-box-shadow: 0 1px 0 rgba(255,255,255, 0.1), inset 0 1px 5px rgba(0,0,0,1);
+	background-color: rgba(193,193,193,0.4);	
+	color: #7b7a7a;
+	text-shadow: 1px 1px 5px rgba(255,255,255,0.8);
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	background-color:none !important;
+	border: 1px solid #E3E3E3!important;
+	padding:4px;
+	height:140px;
+>>>>>>> a2d8b3b... -Traducciones
 }	  
 .wpf-textarea:focus,
 #sig-box:focus,
@@ -510,6 +526,12 @@ table.wpf-profile-fields tr td, table tr th {
   margin: 0;
   padding: 0;
 }
+
+#wpf-wrapper .forum_smilies, 
+#wpf-wrapper .forum_buttons{
+padding:5px;	
+}
+
 #wpf-wrapper #profileHeader h4{
   font-size:22px;
   line-height: 16px;
@@ -1205,3 +1227,4 @@ a.show-hide-hidden {
 	width: 1px;
 }
 /*-------------------[end icomoon]--------------------*/
+
