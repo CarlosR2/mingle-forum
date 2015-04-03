@@ -230,7 +230,8 @@ if (!class_exists('mingleforum'))
 			{
 				//Not using the stylesheet yet as it causes some problems if loaded before the theme's stylesheets
 				//wp_enqueue_style('mingle-forum-skin-css', $this->skin_url.'/style.css');
-				wp_enqueue_script('mingle-forum-js', WPFURL . "js/script.js", array('jquery'));
+				//wp_enqueue_script('mingle-forum-js', WPFURL . "js/script.js", array('jquery'));
+				wp_enqueue_script('mingle-forum-js', WPFURL . "js/script.js");
 			}
 		}
 
@@ -1105,7 +1106,7 @@ if (!class_exists('mingleforum'))
 			if (!$this->options['forum_hide_branding'])
 			{
 				$this->o .= apply_filters('mf_ad_above_branding', ''); //Adsense Area -- Above Branding
-				$this->o .= '<div id="wpf-info"><small><img style="margin: 0 3px -3px 0;" alt="" align="top" src="' . WPFURL . '/images/logo.png" />' . __('Mingle Forum by', 'mingleforum') . ' <a href="http://cartpauj.com">Cartpauj</a> | ' . __('Version:', 'mingleforum') . $this->get_version() . ' | ' . $load . '</small></div>';
+				$this->o .= '<div id="wpf-info"><small><img style="margin: 0 3px -3px 0;" alt="" align="top" src="' . WPFURL . '/images/logo.png" />' . __('Mingle Forum by', 'mingleforum') . '<!-- <a href="http://cartpauj.com">Cartpauj</a> | ' . __('Version:', 'mingleforum') . $this->get_version() . ' | ' . $load . '</small></div>';
 			}
 
 			$above_forum_ad = apply_filters('mf_ad_above_forum', ''); //Adsense Area -- Above Forum
@@ -1507,7 +1508,12 @@ if (!class_exists('mingleforum'))
 			{
 				if ($this->have_access($g->id) || $this->options['show_hidden_forums'])
 				{
-					$this->o .= "<div class='wpf'><table width='100%' class='wpf-table forumsList'>";
+					$hidden = '';
+					if(!$this->have_access($g->id)){
+						$hidden = 'no-access-opacity';	
+					}
+					
+					$this->o .= "<div class='wpf ".$hidden."'><table width='100%' class='wpf-table forumsList'>";
 					$this->o .= "<tr><td class='forumtitle' colspan='4'>
 
           <a href='" . $this->get_grouplink($g->id) . "'>" . $this->output_filter($g->name) . "</a>

@@ -460,6 +460,7 @@ table.wpf-profile-fields tr td, table tr th {
 	background-color:none !important;
 	border: 1px solid #E3E3E3!important;
 	padding:4px;
+	height:140px;
 }	  
 .wpf-textarea:focus,
 #sig-box:focus,
@@ -513,6 +514,12 @@ table.wpf-profile-fields tr td, table tr th {
 	margin: 0;
 	padding: 0;
 }
+
+#wpf-wrapper .forum_smilies, 
+#wpf-wrapper .forum_buttons{
+padding:5px;	
+}
+
 #wpf-wrapper #profileHeader h4{
 	font-size:22px;
 	line-height: 16px;
@@ -1237,4 +1244,12 @@ a.show-hide-hidden {
 	margin-top: 10px !important;
 	padding: 9px !important;
 	display: block !important;
+}
+
+
+.wpf.no-access-opacity{
+	opacity:0.4;
+}
+.wpf.no-access-opacity a{
+	cursor:default;
 }
