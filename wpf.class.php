@@ -8,12 +8,21 @@ if (!class_exists('mingleforum'))
 		var $db_version = 3; //MANAGES DB VERSION
 		var $db_cleanup_name = 'mf_cleanup_db_last_run';
 
+		
+
 		public function __construct()
 		{
+
+
+
 			//Init options
 			$this->load_forum_options();
 			$this->get_set_ads_options();
 			$this->init();
+
+
+
+
 
 			//Action hooks
 			add_action("admin_menu", array($this, "add_admin_pages"));
@@ -31,9 +40,11 @@ if (!class_exists('mingleforum'))
 			//add_action('init', array($this, "run_wpf_insert"));
 			add_action('init', array($this, "maybe_insert"));
 
+			add_action('init', array($this, "setup_urls"));
 
 
-			
+
+
 			add_action('init', array($this, "maybe_do_sitemap"));
 			add_action('wp', array($this, "before_go")); //Redirects Old URL's to SEO URL's
 			add_filter('wpseo_whitelist_permalink_vars', array($this, 'yoast_seo_whitelist_vars'));
@@ -158,8 +169,11 @@ if (!class_exists('mingleforum'))
 		{
 			global $post;
 
-			if (isset($post) && $post instanceof WP_Post && $post->ID == $this->page_id)
-				remove_filter('template_redirect', 'redirect_canonical');
+			//if (isset($post) && $post instanceof WP_Post && $post->ID == $this->page_id){
+			if (isset($post) && $post instanceof WP_Post && $post->ID == $this->check_currentpageid()){				
+
+				remove_filter('template_redirect', 'redirect_canonical');				
+			}
 		}
 
 		public function get_set_ads_options()
@@ -226,7 +240,7 @@ if (!class_exists('mingleforum'))
 			$this->setup_links();
 
 			//Let's be responsible and only load our shiz where it's needed
-			if (is_page($this->page_id))
+			if($this->check_currentpageid()) //if (is_page($this->page_id))
 			{
 				//Not using the stylesheet yet as it causes some problems if loaded before the theme's stylesheets
 				//wp_enqueue_style('mingle-forum-skin-css', $this->skin_url.'/style.css');
@@ -244,7 +258,7 @@ if (!class_exists('mingleforum'))
 <link rel='alternate' type='application/rss+xml' title="<?php echo __("Forums RSS", "mingleforum"); ?>" href="<?php echo $this->global_feed_url; ?>" />
 <?php endif; ?>
 
-<?php if (is_page($this->page_id)): ?>
+<?php if ($this->check_currentpageid() /*is_page($this->page_id)*/): ?>
 <?php if ($this->ads_options['mf_ad_custom_css'] != ""): ?>
 <style type="text/css"><?php echo stripslashes($this->ads_options['mf_ad_custom_css']); ?></style>
 <?php endif; ?>
@@ -322,6 +336,21 @@ if (!class_exists('mingleforum'))
 			echo '</select>';
 			echo '<input type="hidden" id="wpf_submit" name="wpf_submit" value="1" />';
 		}
+		
+		
+		public function setup_urls(){			
+			if (!$this->options['forum_use_seo_friendly_urls']) return;			
+			global $wp_rewrite, $wpdb;
+
+			//let's capture urls under /{forum-pagename}/*
+			$pages = $wpdb->get_results("SELECT post_name FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");
+			if(!$pages) return;			
+			foreach($pages as $p){
+				$n = $p->post_name;
+				add_rewrite_rule('^'.$n.'/(.*)?','index.php?pagename='.$n.'&url_cuenta=$matches[1]','top' );  	  	  
+			}									
+			$wp_rewrite->flush_rules();
+		} 
 
 		//Fix SEO by Yoast conflict
 		public function yoast_seo_whitelist_vars($vars)
@@ -333,7 +362,7 @@ if (!class_exists('mingleforum'))
 
 		public function wpf_footer()
 		{
-			if (is_page($this->page_id))
+			if ($this->check_currentpageid() /*is_page($this->page_id)*/)
 			{
 ?>
 <script type="text/javascript" >
@@ -358,12 +387,24 @@ if (!class_exists('mingleforum'))
 			//We need to change all of these $delims to use a regex on the
 			//request URI instead. This is preventing the form from
 			//working as the home page
+
+
+
 			if ($wp_rewrite->using_permalinks())
 				$delim = "?";
 			else
 				$delim = "&";
 
-			$perm = get_permalink($this->page_id);
+
+
+			//$perm = get_permalink($this->page_id);
+			$perm = get_permalink($this->check_currentpageid()); 
+
+
+
+
+
+
 			$this->forum_link = $perm . $delim . "mingleforumaction=viewforum&f=";
 			$this->group_link = $perm . $delim . "mingleforumaction=vforum&g=";
 			$this->thread_link = $perm . $delim . "mingleforumaction=viewtopic&t=";
@@ -412,19 +453,19 @@ if (!class_exists('mingleforum'))
 				if (isset($this->options['forum_disabled_cats']) && in_array($the_cat_id, $this->options['forum_disabled_cats']) && !is_super_admin($user_ID) && !$this->is_moderator($user_ID, $the_forum_id) && !$this->options['allow_user_replies_locked_cats'])
 					wp_die(__("Oops only Administrators can post in this Forum!", "mingleforum"));
 			}else{
-				
-				// Nothing to insert (i think)
-				
-				return;
-				
-			}
-			
-			
-			
-			
-			
 
-// check (fast) spam
+				// Nothing to insert (i think)
+
+				return;
+
+			}
+
+
+
+
+
+
+			// check (fast) spam
 			if (!is_super_admin() && !$this->is_moderator($user_ID, $the_forum_id))
 			{
 				//We're going to not set a user ID here, I know unconventional, but it's an easy way to account for guests.
@@ -439,7 +480,7 @@ if (!class_exists('mingleforum'))
 					$wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->usermeta} (`meta_key`, `meta_value`) VALUES (%s, %d)", $spam_meta_key, time()));
 			}
 
-			
+
 
 			//--weaver-- check if guest filled in form. TODO. (guests cant edit)
 			if (!isset($_POST['edit_post_submit']))
@@ -455,8 +496,8 @@ if (!class_exists('mingleforum'))
 
 
 
-			
-			
+
+
 
 
 			if (isset($this->options['forum_captcha']) && $this->options['forum_captcha'] == true && !$user_ID)
@@ -475,18 +516,18 @@ if (!class_exists('mingleforum'))
 				}
 			}
 
-			
-			
+
+
 			// NOT USED: it's the same ID
 			$cur_user_ID = apply_filters('wpwf_change_userid', $user_ID); // --weaver-- use real id or generated guest ID
 
 
-			
-			
+
+
 			// AND NOW; THE ACTUAL ACTIONs
-			
-			
-			
+
+
+
 
 			//ADDING A NEW TOPIC?
 			if (isset($_POST['add_topic_submit']))
@@ -714,19 +755,19 @@ if (!class_exists('mingleforum'))
 
 
 
-			
-			
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
+
+
 
 		}
 
 
-	/*	public function run_wpf_insert()
+		/*	public function run_wpf_insert()
 		{
 			global $wpdb, $user_ID;
 			$this->setup_links();
@@ -815,12 +856,45 @@ if (!class_exists('mingleforum'))
 				return $this->thread_link . $id . "." . $num . $postid;
 		}
 
-		public function get_pageid()
+		public function get_pageids()
 		{
 			global $wpdb;
 
-			return $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");
+
+			//What if we want it in more than one page? it can be more than one page
+
+			//	return $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");
+
+			$pages = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");
+			if(!$pages) return null;
+			$p =[];
+			foreach($pages as $p){
+				$p[] = $p->ID;
+			}			
+			return $p;			
 		}
+
+		public function get_pageid()
+		{
+			global $wpdb;
+			return $wpdb->get_var("SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");	
+		}
+
+		public function check_currentpageid(){
+			global $wpdb;
+			$pages = $wpdb->get_results("SELECT ID FROM {$wpdb->posts} WHERE post_content LIKE '%[mingleforum]%' AND post_status = 'publish' AND post_type = 'page'");
+			if(!$pages) return null;
+			$p =[];
+			foreach($pages as $p){
+				//echo $p->ID.'_';
+				if(is_page($p->ID)){
+					//echo 'yay. ';
+					return $p->ID;	
+				}				
+			}			
+			return null;
+		}
+
 
 		public function get_groups($id = '')
 		{
@@ -958,6 +1032,9 @@ if (!class_exists('mingleforum'))
 
 		public function before_go()
 		{
+
+
+
 			$this->setup_links();
 
 			if (isset($_GET['markallread']) && $_GET['markallread'] == "true")
@@ -968,13 +1045,17 @@ if (!class_exists('mingleforum'))
 			else
 				$action = false;
 
+
+
+
 			if (!isset($_GET['getNewForumID']) && !isset($_GET['delete_topic']) &&
 				!isset($_GET['remove_post']) && !isset($_GET['forumsubs']) &&
 				!isset($_GET['threadsubs']) && !isset($_GET['sticky']) &&
 				!isset($_GET['closed']))
 			{
+
 				if ($action != false)
-				{
+				{										
 					if ($this->options['forum_use_seo_friendly_urls'])
 					{
 						switch ($action)
@@ -989,6 +1070,7 @@ if (!class_exists('mingleforum'))
 							$whereto = $this->get_threadlink($this->check_parms($_GET['t']));
 							break;
 						}
+
 						if (!empty($whereto))
 						{
 							header("HTTP/1.1 301 Moved Permanently");
@@ -1011,8 +1093,9 @@ if (!class_exists('mingleforum'))
 			$start_time = microtime(true);
 			get_currentuserinfo();
 			ob_start();
-
 			$this->o = "";
+
+
 
 			if ($user_ID)
 				if (get_user_meta($user_ID, 'wpf_useroptions', true) == '')
@@ -1028,6 +1111,8 @@ if (!class_exists('mingleforum'))
 				if ($this->options['forum_use_seo_friendly_urls'])
 				{
 					$uri = $this->get_seo_friendly_query();
+
+
 
 					if (!empty($uri) && $uri['action'] && $uri['id'])
 					{
@@ -1202,7 +1287,7 @@ if (!class_exists('mingleforum'))
 					if (!$this->have_access($this->current_group)){
 						//wp_die(__("Sorry, but you don't have access to this forum", "mingleforum"));
 						echo '<br>';
-						echo __("Sorry, but you don't have access to this forum", "mingleforum");
+						echo '<p class="wpf_error">'.__("Sorry, but you don't have access to this forum", "mingleforum").'<p>';
 						echo '<br>';
 						echo '<br>';
 						//die('thats it');	
@@ -1278,7 +1363,7 @@ if (!class_exists('mingleforum'))
 
 				$this->header();
 
-				$out = "<table cellpadding='0' cellspacing='0'>
+				$out = "<table cellpadding='0' cellspacing='0'  style='margin-top:10px'>
                   <tr class='pop_menus'>
                     <td width='100%'>" . $this->post_pageing($thread_id) . "</td>
                     <td>" . $this->topic_menu($thread_id) . "</td>
@@ -1403,7 +1488,7 @@ if (!class_exists('mingleforum'))
             </form>";
 					}
 				}
-				$out .= "<table cellpadding='0' cellspacing='0'>
+				$out .= "<table cellpadding='0' cellspacing='0' style='margin-top:10px'>
               <tr class='pop_menus'>
                 <td width='100%'>" . $this->post_pageing($thread_id) . "</td>
                 <td style='height:30px;'>" . $this->topic_menu($thread_id, "bottom") . "
@@ -1512,7 +1597,7 @@ if (!class_exists('mingleforum'))
 					if(!$this->have_access($g->id)){
 						$hidden = 'no-access-opacity';	
 					}
-					
+
 					$this->o .= "<div class='wpf ".$hidden."'><table width='100%' class='wpf-table forumsList'>";
 					$this->o .= "<tr><td class='forumtitle' colspan='4'>
 
@@ -1571,11 +1656,20 @@ if (!class_exists('mingleforum'))
 				}
 			}
 
-			$this->o .= apply_filters('wpwf_new_posts', "<table>
+			/*	$this->o .= apply_filters('wpwf_new_posts', "<table>
             <tr>
               <td><span class='info-poster_in_forum'><img alt='' align='top' src='{$this->skin_url}/images/new_some.png' /> " . __("New posts", "mingleforum") . " <img alt='' align='top' src='{$this->skin_url}/images/new_none.png' /> " . __("No new posts", "mingleforum") . "</span> - <span aria-hidden='true' class='icon-checkmark'><a href='" . get_permalink($this->page_id) . $delim . "markallread=true'>" . __("Mark All Read", "mingleforum") . "</a></span></td>
             </tr>
+          </table><br class='clear'/>");*/
+			$this->o .= apply_filters('wpwf_new_posts', "<table>
+            <tr>
+              <td><span class='info-poster_in_forum'><img alt='' align='top' src='{$this->skin_url}/images/new_some.png' /> " . __("New posts", "mingleforum") . " <img alt='' align='top' src='{$this->skin_url}/images/new_none.png' /> " . __("No new posts", "mingleforum") . "</span> - <span aria-hidden='true' class='icon-checkmark'><a href='" . get_permalink($this->check_currentpageid()) . $delim . "markallread=true'>" . __("Mark All Read", "mingleforum") . "</a></span></td>
+            </tr>
           </table><br class='clear'/>");
+
+
+
+
 
 			$this->footer();
 		}
@@ -2249,15 +2343,16 @@ if (!class_exists('mingleforum'))
 							   "signup" => '<a href="' . stripslashes($this->options['forum_signup_url']) . '">' . __('Register', 'mingleforum') . '</a>',
 							   "new_topics" => "<a class='unread-topics' href='" . $this->base_url . "shownew'>" . __("Unread Topics", "mingleforum") . "</a>",
 							   "view_profile" => $link,
-							   "edit_profile" => "<a aria-hidden='true' class='icon-profile' href='" . site_url("wp-admin/profile.php") . "'>" . __("Edit Profile", "mingleforum") . "</a>",
+							   //"edit_profile" => "<a aria-hidden='true' class='icon-profile' href='" . site_url("wp-admin/profile.php") . "'>" . __("Edit Profile", "mingleforum") . "</a>",
+							   "edit_profile" => "<a aria-hidden='true' class='icon-profile' href='" . site_url("espacio-usuario") . "'>" . __("Edit Profile", "mingleforum") . "</a>",
 							   "edit_settings" => "<a aria-hidden='true' class='icon-settings'  href='" . $this->base_url . "editprofile&user_id={$user_ID}'>" . __("Settings", "mingleforum") . "</a>",
 							   "logout" => '<a  aria-hidden="true" class="icon-logout" href="' . wp_logout_url($this->options['forum_logout_redirect_url']) . '" >' . __('Logout', 'mingleforum') . '</a>',
 							   "move" => "<a aria-hidden='true' class='icon-move-topic' href='" . $this->forum_link . $this->current_forum . "." . $this->curr_page . "&getNewForumID&topic={$this->current_thread}'>" . __("Move Topic", "mingleforum") . "</a>");
 
-			$menu = "<table cellpadding='0' cellspacing='5' id='wp-mainmenu'><tr>";
+			$menu = "<table cellpadding='0' cellspacing='5' id='wp-mainmenu' style='text-align: right;'><tr>";
 			if ($user_ID)
 			{
-				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'shownew') ? 'menu_current' : '';
+				/*$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'shownew') ? 'menu_current' : '';
 				$menu .= "<td valign='top' class='menu_sub {$class}'>{$menuitems['new_topics']}</td>";
 				$menu .= $this->get_inbox_link();
 				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'profile') ? 'menu_current' : '';
@@ -2266,14 +2361,38 @@ if (!class_exists('mingleforum'))
 				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'editprofile') ? 'menu_current' : '';
 				$menu .= "<td valign='top' class='menu_sub {$class}'>{$menuitems['edit_settings']}</td>";
 				$menu .= "<td valign='top' class='menu_sub'>{$menuitems['logout']}</td>";
-
 				switch ($this->current_view)
 				{
 					case THREAD:
 					if ($this->is_moderator($user_ID, $this->current_forum))
 						$menu .= "<td valign='top' class='menu_sub'>{$menuitems['move']}</td>";
 					break;
+				}*/
+
+				$menu .= '<td>';
+				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'shownew') ? 'menu_current' : '';
+				$menu .= "<span valign='top' class='menu_sub {$class}'>{$menuitems['new_topics']}</span>";
+				$menu .= $this->get_inbox_link();
+				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'profile') ? 'menu_current' : '';
+				$menu .= "<span valign='top' class='menu_sub {$class}'>{$menuitems['view_profile']}</span>";
+				$menu .= "<span valign='top' class='menu_sub'>{$menuitems['edit_profile']}</span>";
+				$class = (isset($_GET['mingleforumaction']) && $_GET['mingleforumaction'] == 'editprofile') ? 'menu_current' : '';
+				$menu .= "<span valign='top' class='menu_sub {$class}'>{$menuitems['edit_settings']}</span>";
+				$menu .= "<span valign='top' class='menu_sub'>{$menuitems['logout']}</span>";
+				switch ($this->current_view)
+				{
+					case THREAD:
+					if ($this->is_moderator($user_ID, $this->current_forum))
+						$menu .= "<span valign='top' class='menu_sub'>{$menuitems['move']}</span>";
+					break;
 				}
+				$menu .= '</td>';
+
+
+
+
+
+
 			}
 			else
 			{
@@ -2417,8 +2536,9 @@ if (!class_exists('mingleforum'))
 
 			$this->setup_links();
 
-			$trail = "<a aria-hidden='true' class='icon-forum-home' href='" . get_permalink($this->page_id) . "'>" . __("Forum Home", "mingleforum") . "</a>";
+			//$trail = "<a aria-hidden='true' class='icon-forum-home' href='" . get_permalink($this->page_id) . "'>   " . __("Forum Home", "mingleforum") . "</a>";
 
+			$trail = "<a aria-hidden='true' class='icon-forum-home' href='" . get_permalink($this->check_currentpageid()) . "'>   " . __("Forum Home", "mingleforum") . "</a>";
 			if ($this->current_group)
 				if ($this->options['forum_use_seo_friendly_urls'])
 			{
@@ -3423,9 +3543,19 @@ if (!class_exists('mingleforum'))
 		//SEO Friendly URL stuff
 		public function get_seo_friendly_query()
 		{
+
+
+
 			$end = array();
 			$request_uri = $_SERVER['REQUEST_URI'];
-			$link = str_replace(site_url(), '', get_permalink($this->page_id));
+			//$link = str_replace(site_url(), '', get_permalink($this->page_id));
+
+
+
+
+
+			$link = str_replace(site_url(), '', get_permalink($this->check_currentpageid()));
+
 			$uri = explode('/', trim(str_replace($link, '', $request_uri), '/'));
 
 			if (array_count_values($uri))
@@ -3462,7 +3592,8 @@ if (!class_exists('mingleforum'))
 		public function set_seo_friendly_rules($args)
 		{
 			$new = array();
-			$link = trim(str_replace(array(site_url(), 'index.php/'), '', get_permalink($this->page_id)), '/');
+			//$link = trim(str_replace(array(site_url(), 'index.php/'), '', get_permalink($this->page_id)), '/');
+			$link = trim(str_replace(array(site_url(), 'index.php/'), '', get_permalink($this->check_currentpageid())), '/');
 			$new['(' . $link . ')(/[-/0-9a-zA-Z]+)?/(.*)$'] = 'index.php?pagename=$matches[1]&page=$matches[2]';
 
 			return $new + $args;
