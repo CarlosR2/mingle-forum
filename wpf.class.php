@@ -337,7 +337,7 @@ if (!class_exists('mingleforum'))
 			echo '<input type="hidden" id="wpf_submit" name="wpf_submit" value="1" />';
 		}
 		
-		
+		 
 		public function setup_urls(){			
 			if (!$this->options['forum_use_seo_friendly_urls']) return;			
 			global $wp_rewrite, $wpdb;
