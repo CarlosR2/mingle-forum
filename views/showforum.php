@@ -1,4 +1,4 @@
-<table cellpadding="0" cellspacing="0">
+<table cellpadding="0" cellspacing="0"  style='margin-top:10px;margin-bottom:25px'>
   <tr class="pop_menus">
     <td width="100%"><?php echo $this->thread_pageing($forum_id); ?></td>
     <td><?php echo $this->forum_menu($this->current_group); ?></td>
@@ -115,7 +115,7 @@
   </table>
 </div>
 
-<table cellpadding="0" cellspacing="0">
+<table cellpadding="0" cellspacing="0"  style='margin-top:35px'>
   <tr class="pop_menus">
     <td width="100%"><?php echo $this->thread_pageing($forum_id); ?></td>
     <td><?php echo $this->forum_menu($this->current_group, "bottom"); ?></td>

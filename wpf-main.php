@@ -28,7 +28,7 @@
 //test
 //Textdomain Hook
 
-define('DEBUG',true);
+define('DEBUG',false);
 
 if(DEBUG){	
 	ini_set('display_errors',1);

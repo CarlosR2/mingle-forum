@@ -8,6 +8,8 @@ define('WPFPLUGIN', "mingle-forum");
 define('WPFDIR', dirname(plugin_basename(__FILE__)));
 define('WPFPATH', plugin_dir_path(__FILE__));
 define('WPFURL', plugin_dir_url(__FILE__));
+
+
 define('OLDSKINDIR', WPFPATH . 'default-skin/');
 define('OLDSKINURL', WPFURL . 'default-skin/');
 define('SKINDIR', WPFPATH . '/mingle-forum-skins/');
